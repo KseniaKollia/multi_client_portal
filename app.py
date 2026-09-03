@@ -26,41 +26,41 @@ def check_password():
         <style>
         @import url('https://fonts.cdnfonts.com/css/pp-pangram-sans');
 
-        /* Κεντράρισμα και φόντο Login Form */
+        /* Κεντράρισμα και Μπλε Φόντο/Περίγραμμα Login Form */
         div[data-testid="stForm"] {
-            background-color: #112229 !important;
-            border: 2px solid #2FDDC0 !important;
+            background-color: #0E1A1F !important;
+            border: 2px solid #09A1A4 !important;
             border-radius: 15px !important;
-            padding: 30px !important;
-            box-shadow: 0 0 20px rgba(47, 221, 192, 0.2) !important;
-            max-width: 500px;
+            padding: 35px 30px !important;
+            box-shadow: 0 0 20px rgba(9, 161, 164, 0.25) !important;
+            max-width: 450px;
             margin: 0 auto;
         }
 
         .login-title {
-            color: #2FDDC0 !important;
+            color: #09A1A4 !important;
             font-family: 'PP Pangram Sans', sans-serif !important;
             font-weight: 700 !important;
-            font-size: 32px !important;
+            font-size: 22px !important;
             text-transform: uppercase !important;
             text-align: center !important;
-            letter-spacing: 2px !important;
-            margin-top: 10px !important;
+            letter-spacing: 3px !important;
+            margin-top: 15px !important;
             margin-bottom: 5px !important;
         }
 
         .login-subtitle {
-            color: #A0AAB0 !important;
+            color: #8A9BA8 !important;
             font-family: 'PP Pangram Sans', sans-serif !important;
             text-align: center !important;
-            font-size: 14px !important;
+            font-size: 13px !important;
             margin-bottom: 25px !important;
         }
 
-        /* Styling Κουμπιού Connect */
+        /* Styling Κουμπιού Connect σε Μπλε Τόνους */
         div[data-testid="stForm"] button[type="submit"] {
-            background-color: #2FDDC0 !important;
-            color: #112229 !important;
+            background-color: #09A1A4 !important;
+            color: #FFFFFF !important;
             font-weight: bold !important;
             border-radius: 8px !important;
             border: none !important;
@@ -70,8 +70,9 @@ def check_password():
         }
 
         div[data-testid="stForm"] button[type="submit"]:hover {
-            background-color: #24bfa6 !important;
-            box-shadow: 0 0 10px rgba(47, 221, 192, 0.5) !important;
+            background-color: #2FDDC0 !important;
+            color: #112229 !important;
+            box-shadow: 0 0 12px rgba(47, 221, 192, 0.4) !important;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -81,13 +82,13 @@ def check_password():
 
     with col2:
         with st.form("login_form"):
-            # WEST LOGO
+            # WEST LOGO (Χωρίς διπλό τίτλο West)
             try:
                 st.image("WEST_logo.png", use_container_width=True)
             except Exception:
                 pass
 
-            st.markdown('<div class="login-title">West Analytics</div>', unsafe_allow_html=True)
+            st.markdown('<div class="login-title">Analytics Portal</div>', unsafe_allow_html=True)
             st.markdown('<div class="login-subtitle">Please enter your credentials to access your dashboard</div>', unsafe_allow_html=True)
 
             username_input = st.text_input("Username:").strip()
