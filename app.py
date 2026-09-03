@@ -21,7 +21,7 @@ def check_password():
     if st.session_state["authenticated"]:
         return True
 
-    # Compact Custom CSS για να χωράει η φόρμα χωρίς scroll
+    # Custom CSS για την οθόνη Login
     st.markdown("""
         <style>
         @import url('https://fonts.cdnfonts.com/css/pp-pangram-sans');
@@ -93,47 +93,54 @@ def check_password():
         </style>
     """, unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1, 2, 1])
+    # Δημιουργία placeholder που καθαρίζει αμέσως τη φόρμα
+    login_placeholder = st.empty()
 
-    with col2:
-        with st.form("login_form"):
-            # Κεντράρισμα του Logo μέσω εσωτερικών στυλών
-            logo_col1, logo_col2, logo_col3 = st.columns([1, 2, 1])
-            with logo_col2:
-                try:
-                    st.image("WEST_logo.png", use_container_width=True)
-                except Exception:
-                    pass
+    with login_placeholder.container():
+        col1, col2, col3 = st.columns([1, 2, 1])
 
-            st.markdown('<div class="login-title">Analytics</div>', unsafe_allow_html=True)
-            st.markdown('<div class="login-subtitle">Please enter your credentials to access your dashboard</div>', unsafe_allow_html=True)
+        with col2:
+            with st.form("login_form"):
+                logo_col1, logo_col2, logo_col3 = st.columns([1, 2, 1])
+                with logo_col2:
+                    try:
+                        st.image("WEST_logo.png", use_container_width=True)
+                    except Exception:
+                        pass
 
-            username_input = st.text_input("Username:").strip()
-            password_input = st.text_input("Password:", type="password").strip()
-            submit_button = st.form_submit_button("Connect")
+                st.markdown('<div class="login-title">Analytics</div>', unsafe_allow_html=True)
+                st.markdown('<div class="login-subtitle">Please enter your credentials to access your dashboard</div>', unsafe_allow_html=True)
 
-            if submit_button:
-                users_db = st.secrets.get("users", {})
+                username_input = st.text_input("Username:").strip()
+                password_input = st.text_input("Password:", type="password").strip()
+                submit_button = st.form_submit_button("Connect")
 
-                matched_user_key = None
-                for key in users_db:
-                    if key.upper() == username_input.upper():
-                        matched_user_key = key
-                        break
+                if submit_button:
+                    users_db = st.secrets.get("users", {})
 
-                if matched_user_key:
-                    user_info = users_db[matched_user_key]
-                    if password_input == user_info.get("password"):
-                        st.session_state["authenticated"] = True
-                        st.session_state["current_user"] = matched_user_key
-                        st.session_state["module_path"] = user_info.get("module")
-                        st.session_state["sheet_id"] = user_info.get("sheet_id")
-                        st.session_state["display_title"] = user_info.get("display_name", "DECLUTTERING DASHBOARD")
-                        st.rerun()
+                    matched_user_key = None
+                    for key in users_db:
+                        if key.upper() == username_input.upper():
+                            matched_user_key = key
+                            break
+
+                    if matched_user_key:
+                        user_info = users_db[matched_user_key]
+                        if password_input == user_info.get("password"):
+                            # Καθαρίζουμε ΑΜΕΣΩΣ τη φόρμα Login από την οθόνη
+                            login_placeholder.empty()
+
+                            st.session_state["authenticated"] = True
+                            st.session_state["current_user"] = matched_user_key
+                            st.session_state["module_path"] = user_info.get("module")
+                            st.session_state["sheet_id"] = user_info.get("sheet_id")
+                            st.session_state["display_title"] = user_info.get("display_name", "DECLUTTERING DASHBOARD")
+
+                            st.rerun()
+                        else:
+                            st.error("🚨 Wrong password.")
                     else:
-                        st.error("🚨 Wrong password.")
-                else:
-                    st.error("🚨 Invalid username or password.")
+                        st.error("🚨 Invalid username or password.")
     return False
 
 if not check_password():
@@ -145,8 +152,9 @@ if not check_password():
 module_name = st.session_state.get("module_path")
 
 try:
-    dashboard_module = importlib.import_module(module_name)
-    dashboard_module.run()
+    with st.spinner("⏳ Loading Dashboard... Please wait."):
+        dashboard_module = importlib.import_module(module_name)
+        dashboard_module.run()
 except Exception as e:
     st.error(f"⚠️ Αδυναμία φόρτωσης του Dashboard: {e}")
 
