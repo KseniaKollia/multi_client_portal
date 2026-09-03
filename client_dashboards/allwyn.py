@@ -228,18 +228,23 @@ def run():
     if selected_weeks:
         df_filtered = df_filtered[df_filtered["WEEK_NUM"].isin(selected_weeks)]
 
-    # --- ΦΙΛΤΡO STORE ID ΣΤΗ SIDEBAR ---
+    # --- ΦΙΛΤΡO STORE ID ΣΤΗ SIDEBAR (MULTI-SELECT) ---
     if "ID" in df_filtered.columns and not df_filtered.empty:
         store_counts = df_filtered.groupby("ID")["WEEK_NUM"].nunique()
         store_options = sorted([f"{sid} — ({count} weeks)" for sid, count in store_counts.items() if str(sid) != "nan"])
     else:
         store_options = []
 
-    selected_store_option = st.sidebar.selectbox("STORE ID (Αναζήτηση)", options=["All Store IDs"] + store_options, index=0)
+    selected_store_options = st.sidebar.multiselect(
+        "STORE ID (Αναζήτηση / Πολλαπλή Επιλογή)", 
+        options=store_options, 
+        default=[],
+        placeholder="Select one or more Store IDs"
+    )
 
-    if selected_store_option != "All Store IDs":
-        selected_id = selected_store_option.split(" — ")[0].strip()
-        df_filtered = df_filtered[df_filtered["ID"] == selected_id]
+    if selected_store_options:
+        selected_ids = [opt.split(" — ")[0].strip() for opt in selected_store_options]
+        df_filtered = df_filtered[df_filtered["ID"].isin(selected_ids)]
 
     st.sidebar.markdown("---")
     st.sidebar.header("📥 Export Data")
@@ -284,7 +289,7 @@ def run():
         else:
             df_last_responses["STATUS_CLEAN"] = "ACTIVE"
 
-        valid_answers = ["ΝΑΙ", "ΔΕΝ ΥΠΗΡΧΕ ΠΑΛΑΙΟ-ΜΗ ΕΓΚΕΚΡΙΜΕΝΟ ΥΛΙΚΟ", "ΔΕΝ ΥΠΗΡΧΕ ΠΑΛΑΙO-ΜΗ ΕΓΚΕΚΡΙΜEΝO ΥΛΙΚO"]
+        valid_answers = ["ΝΑΙ", "ΔΕΝ ΥΠΗΡΧΕ ΠΑΛΑΙΟ-ΜΗ ΕΓΚΕΚΡΙΜΕΝΟ ΥΛΙΚΟ", "ΔΕΝ ΥΠΗΡΧΕ ΠΑΛΑΙO-ΜΗ ΕΓΚΕΚΡΙMΕΝO ΥΛΙΚO"]
 
         # =========================================================
         # ΔΙΑΓΡΑΜΜΑ 1: ACTIVE NETWORK COVERAGE
@@ -386,7 +391,7 @@ def run():
         color_map = {
             "ΝΑΙ": "#2FDDC0",
             "ΔΕΝ ΥΠΗΡΧΕ ΠΑΛΑΙΟ-ΜΗ ΕΓΚΕΚΡΙΜΕΝΟ ΥΛΙΚΟ": "#09A1A4",
-            "ΔΕΝ ΥΠΗΡΧΕ ΠΑΛΑΙO-ΜΗ ΕΓΚΕΚΡΙΜEΝO ΥΛΙΚO": "#09A1A4",
+            "ΔΕΝ ΥΠΗΡΧΕ ΠΑΛΑΙO-ΜΗ ΕΓΚΕΚΡΙMΕΝO ΥΛΙΚO": "#09A1A4",
             "ΟΧΙ": "#115566"
         }
 
@@ -413,7 +418,7 @@ def run():
         )
         st.plotly_chart(fig_weekly, use_container_width=True)
     else:
-        st.info("Δεν υπάρχουν δεδομένα για το επιλεγμένο Store ID.")
+        st.info("Δεν υπάρχουν δεδομένα για τα επιλεγμένα Store IDs.")
 
     # ---------------------------------------------------------
     # 8. ΧΑΡΤΗΣ ΚΑΛΥΨΗΣ ΑΝΑ REGION
@@ -477,7 +482,7 @@ def run():
         }
 
         REGION_COORDINATES = {normalize_string(k): v for k, v in REGION_COORDINATES_RAW.items()}
-        valid_answers = ["ΝΑΙ", "ΔΕΝ ΥΠΗΡΧΕ ΠΑΛΑΙΟ-ΜΗ ΕΓΚΕΚΡΙΜΕΝΟ ΥΛΙΚΟ", "ΔΕΝ ΥΠΗΡΧΕ ΠΑΛΑΙO-ΜΗ ΕΓΚΕΚΡΙΜEΝO ΥΛΙΚO"]
+        valid_answers = ["ΝΑΙ", "ΔΕΝ ΥΠΗΡΧΕ ΠΑΛΑΙΟ-ΜΗ ΕΓΚΕΚΡΙΜΕΝΟ ΥΛΙΚΟ", "ΔΕΝ ΥΠΗΡΧΕ ΠΑΛΑΙO-ΜΗ ΕΓΚΕΚΡΙMΕΝO ΥΛΙΚO"]
         
         df_active_map = df_filtered.dropna(subset=["ID"]).copy()
         df_active_map["REGION_NORM"] = df_active_map["REGION"].apply(normalize_string)
