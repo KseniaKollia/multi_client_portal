@@ -32,52 +32,53 @@ def check_password():
             padding-bottom: 1rem !important;
         }
 
-        /* Compact Φόντο/Περίγραμμα Login Form */
+        /* Compact Φόντο & Σκούρο Μπλε Περίγραμμα Login Form */
         div[data-testid="stForm"] {
-            background-color: #0E1A1F !important;
-            border: 2px solid #09A1A4 !important;
+            background-color: #0A1318 !important;
+            border: 2px solid #10385C !important;
             border-radius: 12px !important;
             padding: 20px 25px !important;
-            box-shadow: 0 0 15px rgba(9, 161, 164, 0.2) !important;
+            box-shadow: 0 0 20px rgba(16, 56, 92, 0.4) !important;
             max-width: 400px;
             margin: 0 auto;
         }
 
-        /* Περιορισμός μεγέθους Logo */
+        /* Περιορισμός μεγέθους & Κεντράρισμα Logo */
         div[data-testid="stForm"] img {
             max-height: 55px !important;
             width: auto !important;
             display: block;
-            margin: 0 auto;
+            margin: 0 auto !important;
         }
 
+        /* Σκούρο Μπλε Τίτλος Analytics */
         .login-title {
-            color: #09A1A4 !important;
+            color: #21619A !important;
             font-family: 'PP Pangram Sans', sans-serif !important;
             font-weight: 700 !important;
-            font-size: 18px !important;
+            font-size: 19px !important;
             text-transform: uppercase !important;
             text-align: center !important;
             letter-spacing: 2px !important;
-            margin-top: 10px !important;
+            margin-top: 8px !important;
             margin-bottom: 2px !important;
         }
 
         .login-subtitle {
-            color: #8A9BA8 !important;
+            color: #6C8294 !important;
             font-family: 'PP Pangram Sans', sans-serif !important;
             text-align: center !important;
             font-size: 12px !important;
             margin-bottom: 15px !important;
         }
 
-        /* Styling Κουμπιού Connect */
+        /* Styling Κουμπιού Connect σε Σκούρο Μπλε */
         div[data-testid="stForm"] button[type="submit"] {
-            background-color: #09A1A4 !important;
+            background-color: #10385C !important;
             color: #FFFFFF !important;
             font-weight: bold !important;
             border-radius: 6px !important;
-            border: none !important;
+            border: 1px solid #1B4D7E !important;
             width: 100% !important;
             padding: 8px !important;
             margin-top: 5px !important;
@@ -85,9 +86,9 @@ def check_password():
         }
 
         div[data-testid="stForm"] button[type="submit"]:hover {
-            background-color: #2FDDC0 !important;
-            color: #112229 !important;
-            box-shadow: 0 0 10px rgba(47, 221, 192, 0.4) !important;
+            background-color: #1B4D7E !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 0 12px rgba(27, 77, 126, 0.6) !important;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -96,10 +97,13 @@ def check_password():
 
     with col2:
         with st.form("login_form"):
-            try:
-                st.image("WEST_logo.png")
-            except Exception:
-                pass
+            # Κεντράρισμα του Logo μέσω εσωτερικών στυλών
+            logo_col1, logo_col2, logo_col3 = st.columns([1, 2, 1])
+            with logo_col2:
+                try:
+                    st.image("WEST_logo.png", use_container_width=True)
+                except Exception:
+                    pass
 
             st.markdown('<div class="login-title">Analytics</div>', unsafe_allow_html=True)
             st.markdown('<div class="login-subtitle">Please enter your credentials to access your dashboard</div>', unsafe_allow_html=True)
