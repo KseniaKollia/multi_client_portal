@@ -122,18 +122,27 @@ def check_password():
                     if matched_user_key:
                         user_info = users_db[matched_user_key]
                         
-                        # Έλεγχος αν το password ταιριάζει (μετατροπές σε string για ασφάλεια)
+                        # Έλεγχος κωδικού
                         if str(password_input) == str(user_info.get("password")):
                             login_placeholder.empty()
 
                             st.session_state["authenticated"] = True
                             st.session_state["current_user"] = matched_user_key
 
-                            # Έλεγχος αν είναι Admin (είτε από το πεδίο role είτε αν το username είναι admin)
-                            is_admin = (str(user_info.get("role", "")).lower() == "admin") or (matched_user_key.lower() == "admin")
+                            # Έλεγχος αν είναι Admin (Case-Insensitive)
+                            user_role = str(user_info.get("role", "")).lower()
+                            is_admin = (user_role == "admin") or (matched_user_key.lower() == "admin")
                             st.session_state["is_admin"] = is_admin
 
-                            if not is_admin:
+                            if is_admin:
+                                # Αν είναι Admin, βρίσκουμε τον πρώτο διαθέσιμο πελάτη για να φορτώσει αμέσως
+                                client_keys = [k for k, v in users_db.items() if str(v.get("role", "")).lower() != "admin" and k.lower() != "admin"]
+                                if client_keys:
+                                    first_client = users_db[client_keys[0]]
+                                    st.session_state["module_path"] = first_client.get("module")
+                                    st.session_state["sheet_id"] = first_client.get("sheet_id")
+                                    st.session_state["display_title"] = first_client.get("display_name", "DECLUTTERING DASHBOARD")
+                            else:
                                 st.session_state["module_path"] = user_info.get("module")
                                 st.session_state["sheet_id"] = user_info.get("sheet_id")
                                 st.session_state["display_title"] = user_info.get("display_name", "DECLUTTERING DASHBOARD")
@@ -154,7 +163,7 @@ if not check_password():
 users_db = st.secrets.get("users", {})
 
 if st.session_state.get("is_admin"):
-    # Φιλτράρισμα μόνο των πελατών που έχουν ορίσει module (εξαιρούνται οι admin)
+    # Φιλτράρισμα μόνο των κανονικών πελατών
     client_keys = [
         k for k, v in users_db.items() 
         if str(v.get("role", "")).lower() != "admin" and k.lower() != "admin"
@@ -184,7 +193,7 @@ if module_name:
     try:
         with st.spinner("⏳ Loading Dashboard... Please wait."):
             dashboard_module = importlib.import_module(module_name)
-            importlib.reload(dashboard_module)  # Εξασφαλίζει φρέσκια φόρτωση
+            importlib.reload(dashboard_module)
             dashboard_module.run()
     except Exception as e:
         st.error(f"⚠️ Αδυναμία φόρτωσης του Dashboard (`{module_name}`): {e}")
@@ -192,7 +201,7 @@ else:
     st.warning("⚠️ Δεν έχει οριστεί Dashboard module για αυτόν τον χρήστη.")
 
 # ---------------------------------------------------------
-# 5. SIDEBAR LOG OUT (ΚΑΤΩ ΑΠΟ ΤΑ ΦΙΛΤΡΑ)
+# 5. SIDEBAR LOG OUT
 # ---------------------------------------------------------
 with st.sidebar:
     st.markdown("---")
