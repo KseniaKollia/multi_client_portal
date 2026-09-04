@@ -121,14 +121,16 @@ def check_password():
 
                     if matched_user_key:
                         user_info = users_db[matched_user_key]
-                        if password_input == user_info.get("password"):
+                        
+                        # Έλεγχος αν το password ταιριάζει (μετατροπές σε string για ασφάλεια)
+                        if str(password_input) == str(user_info.get("password")):
                             login_placeholder.empty()
 
                             st.session_state["authenticated"] = True
                             st.session_state["current_user"] = matched_user_key
-                            
-                            # Έλεγχος αν ο χρήστης είναι Admin
-                            is_admin = user_info.get("role") == "admin" or matched_user_key.lower() == "admin"
+
+                            # Έλεγχος αν είναι Admin (είτε από το πεδίο role είτε αν το username είναι admin)
+                            is_admin = (str(user_info.get("role", "")).lower() == "admin") or (matched_user_key.lower() == "admin")
                             st.session_state["is_admin"] = is_admin
 
                             if not is_admin:
@@ -152,16 +154,19 @@ if not check_password():
 users_db = st.secrets.get("users", {})
 
 if st.session_state.get("is_admin"):
-    # Φιλτράρισμα μόνο των κανονικών πελατών (εξαιρείται ο admin)
-    client_keys = [k for k, v in users_db.items() if v.get("role") != "admin" and k.lower() != "admin"]
-    
+    # Φιλτράρισμα μόνο των πελατών που έχουν ορίσει module (εξαιρούνται οι admin)
+    client_keys = [
+        k for k, v in users_db.items() 
+        if str(v.get("role", "")).lower() != "admin" and k.lower() != "admin"
+    ]
+
     if client_keys:
         selected_client = st.sidebar.selectbox(
             "👑 Select Client (Admin View):",
             options=client_keys,
             index=0
         )
-        # Ενημέρωση των στοιχείων για τον επιλεγμένο πελάτη
+        # Ενημέρωση των στοιχείων session για τον επιλεγμένο πελάτη
         client_info = users_db[selected_client]
         st.session_state["module_path"] = client_info.get("module")
         st.session_state["sheet_id"] = client_info.get("sheet_id")
@@ -179,9 +184,10 @@ if module_name:
     try:
         with st.spinner("⏳ Loading Dashboard... Please wait."):
             dashboard_module = importlib.import_module(module_name)
+            importlib.reload(dashboard_module)  # Εξασφαλίζει φρέσκια φόρτωση
             dashboard_module.run()
     except Exception as e:
-        st.error(f"⚠️ Αδυναμία φόρτωσης του Dashboard: {e}")
+        st.error(f"⚠️ Αδυναμία φόρτωσης του Dashboard (`{module_name}`): {e}")
 else:
     st.warning("⚠️ Δεν έχει οριστεί Dashboard module για αυτόν τον χρήστη.")
 
