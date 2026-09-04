@@ -111,7 +111,15 @@ def check_password():
                 submit_button = st.form_submit_button("Connect")
 
                 if submit_button:
-                    users_db = st.secrets.get("users", {})
+                    # Ανάγνωση χρηστών από τα secrets
+                    users_db = dict(st.secrets.get("users", {}))
+
+                    # Bεβαιωνόμαστε ότι ο admin υπάρχει πάντα στο dictionary
+                    if "admin" not in [k.lower() for k in users_db.keys()]:
+                        users_db["admin"] = {
+                            "password": "DATAADMIN@48",
+                            "role": "admin"
+                        }
 
                     matched_user_key = None
                     for key in users_db:
@@ -122,20 +130,19 @@ def check_password():
                     if matched_user_key:
                         user_info = users_db[matched_user_key]
                         
-                        # Έλεγχος κωδικού
                         if str(password_input) == str(user_info.get("password")):
                             login_placeholder.empty()
 
                             st.session_state["authenticated"] = True
                             st.session_state["current_user"] = matched_user_key
 
-                            # Έλεγχος αν είναι Admin (Case-Insensitive)
+                            # Έλεγχος αν είναι Admin
                             user_role = str(user_info.get("role", "")).lower()
                             is_admin = (user_role == "admin") or (matched_user_key.lower() == "admin")
                             st.session_state["is_admin"] = is_admin
 
                             if is_admin:
-                                # Αν είναι Admin, βρίσκουμε τον πρώτο διαθέσιμο πελάτη για να φορτώσει αμέσως
+                                # Φόρτωση του πρώτου διαθέσιμου πελάτη για τον Admin
                                 client_keys = [k for k, v in users_db.items() if str(v.get("role", "")).lower() != "admin" and k.lower() != "admin"]
                                 if client_keys:
                                     first_client = users_db[client_keys[0]]
@@ -160,7 +167,7 @@ if not check_password():
 # ---------------------------------------------------------
 # 3. ADMIN SWITCHER (DROPDOWN ΓΙΑ ADMIN)
 # ---------------------------------------------------------
-users_db = st.secrets.get("users", {})
+users_db = dict(st.secrets.get("users", {}))
 
 if st.session_state.get("is_admin"):
     # Φιλτράρισμα μόνο των κανονικών πελατών
